@@ -25,24 +25,28 @@ def upload():
     signature = sign_data(data, private_key)
     pub_key = export_key(public_key)
 
-    # Chuyển dữ liệu file sang dạng chuỗi (text hoặc base64)
+    # Xác định kiểu dữ liệu (text hoặc base64)
     try:
         file_data = data.decode()
+        data_type = 'text'
     except:
         file_data = base64.b64encode(data).decode()
+        data_type = 'base64'
 
-    # Gửi tới tất cả client WebSocket (người nhận)
+    # Gửi dữ liệu qua WebSocket
     socketio.emit('new_signature', {
         'signature': signature.hex() if isinstance(signature, bytes) else signature,
         'pub_key': pub_key.decode() if isinstance(pub_key, bytes) else pub_key,
-        'data': file_data
+        'data': file_data,
+        'data_type': data_type
     })
 
-    # Gửi lại trang cho người gửi, để hiển thị chữ ký và dữ liệu
+    # Trả về trang hiển thị cho người gửi
     return render_template('sender.html',
                            signature=signature.hex() if isinstance(signature, bytes) else signature,
                            pub_key=pub_key.decode() if isinstance(pub_key, bytes) else pub_key,
-                           file_data=file_data)
+                           file_data=file_data,
+                           data_type=data_type)
 
 @socketio.on('connect')
 def on_connect():
