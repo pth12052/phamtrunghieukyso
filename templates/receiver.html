@@ -4,6 +4,19 @@
     <meta charset="UTF-8">
     <title>Người nhận</title>
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+        #drop-area-verify {
+            border: 2px dashed #aaa;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #drop-area-verify.highlight {
+            background-color: #e0f7fa;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -17,7 +30,22 @@
         <textarea id="received-pubkey" rows="10" readonly></textarea>
 
         <h2>Nội dung file nhận được:</h2>
-        <textarea id="received-data" rows="8" readonly></textarea>
+        <textarea id="received-data" rows="6" readonly></textarea>
+
+        <input type="hidden" id="received-data-type">
+    </div>
+
+    <hr>
+
+    <div class="verify">
+        <h2>🔍 Xác minh file được gửi</h2>
+        <div id="drop-area-verify">
+            <p>Kéo thả hoặc nhấn để chọn file cần xác minh</p>
+            <input type="file" id="verifyFileInput" style="display: none;" />
+            <p id="verify-file-name" style="font-weight: bold;"></p>
+        </div>
+        <button id="verifyButton">✅ Xác minh file</button>
+        <div id="verify-result" style="margin-top: 10px; font-weight: bold;"></div>
     </div>
 </div>
 
@@ -29,7 +57,79 @@
         document.getElementById('received-signature').value = data.signature;
         document.getElementById('received-pubkey').value = data.pub_key;
         document.getElementById('received-data').value = data.data;
-        alert("🔐 Đã nhận được chữ ký, public key và nội dung file từ người gửi!");
+        document.getElementById('received-data-type').value = data.data_type || 'text';
+        alert("🔐 Đã nhận được chữ ký, public key và nội dung file!");
+    });
+
+    const fileInput = document.getElementById('verifyFileInput');
+    const dropVerify = document.getElementById('drop-area-verify');
+    const fileNameDisplay = document.getElementById('verify-file-name');
+    const verifyResult = document.getElementById('verify-result');
+    let selectedFile = null;
+
+    dropVerify.addEventListener('click', () => fileInput.click());
+
+    dropVerify.addEventListener('dragover', e => {
+        e.preventDefault();
+        dropVerify.classList.add('highlight');
+    });
+
+    dropVerify.addEventListener('dragleave', () => {
+        dropVerify.classList.remove('highlight');
+    });
+
+    dropVerify.addEventListener('drop', e => {
+        e.preventDefault();
+        dropVerify.classList.remove('highlight');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            selectedFile = files[0];
+            fileInput.files = files;
+            fileNameDisplay.textContent = `📄 File đã chọn: ${selectedFile.name}`;
+        }
+    });
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            selectedFile = fileInput.files[0];
+            fileNameDisplay.textContent = `📄 File đã chọn: ${selectedFile.name}`;
+        }
+    });
+
+    document.getElementById('verifyButton').addEventListener('click', () => {
+        if (!selectedFile) {
+            verifyResult.textContent = "⚠️ Vui lòng chọn hoặc kéo một file vào trước.";
+            verifyResult.style.color = "orange";
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const fileBuffer = new Uint8Array(e.target.result);
+            const receivedData = document.getElementById('received-data').value.trim();
+            const dataType = document.getElementById('received-data-type').value;
+
+            if (dataType === 'base64') {
+                const fileBase64 = btoa(String.fromCharCode(...fileBuffer));
+                if (fileBase64 === receivedData) {
+                    verifyResult.textContent = "✅ File trùng khớp (base64)";
+                    verifyResult.style.color = "green";
+                } else {
+                    verifyResult.textContent = "❌ File không khớp (base64)";
+                    verifyResult.style.color = "red";
+                }
+            } else {
+                const fileText = new TextDecoder().decode(fileBuffer).trim();
+                if (fileText === receivedData) {
+                    verifyResult.textContent = "✅ File trùng khớp (text)";
+                    verifyResult.style.color = "green";
+                } else {
+                    verifyResult.textContent = "❌ File không khớp (text)";
+                    verifyResult.style.color = "red";
+                }
+            }
+        };
+        reader.readAsArrayBuffer(selectedFile);
     });
 </script>
 </body>
