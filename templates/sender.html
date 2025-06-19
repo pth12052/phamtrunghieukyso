@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Người gửi</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+    <h1>Người Gửi: Truyền File Có Ký Số</h1>
+
+    <form method="POST" action="/upload" enctype="multipart/form-data" id="upload-form">
+        <div id="drop-area">
+            <p>Kéo thả file hoặc nhấn để chọn</p>
+            <input type="file" name="file" id="fileElem" required>
+        </div>
+        <div id="file-name"></div>
+        <button type="submit">Tải lên & Ký số</button>
+    </form>
+
+    {% if signature %}
+    <div class="result">
+        <h2>Chữ ký:</h2>
+        <textarea rows="6" readonly id="signature">{{ signature }}</textarea>
+
+        <h2>Public Key:</h2>
+        <textarea rows="10" readonly id="pubkey">{{ pub_key }}</textarea>
+
+        <h2>Dữ liệu đã ký:</h2>
+        <textarea rows="6" readonly id="signed-data">{{ file_data }}</textarea>
+
+        <button id="send-to-receiver">📤 Gửi sang người nhận</button>
+    </div>
+    {% endif %}
+</div>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+    const dropArea = document.getElementById('drop-area');
+    const fileInput = document.getElementById('fileElem');
+    const fileNameDisplay = document.getElementById('file-name');
+
+    dropArea.addEventListener('click', () => fileInput.click());
+    dropArea.addEventListener('dragover', e => {
+        e.preventDefault();
+        dropArea.classList.add('highlight');
+    });
+    dropArea.addEventListener('dragleave', () => dropArea.classList.remove('highlight'));
+    dropArea.addEventListener('drop', e => {
+        e.preventDefault();
+        dropArea.classList.remove('highlight');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            fileNameDisplay.innerHTML = `📄 File đã chọn: <strong>${files[0].name}</strong>`;
+        }
+    });
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            fileNameDisplay.innerHTML = `📄 File đã chọn: <strong>${fileInput.files[0].name}</strong>`;
+        }
+    });
+
+    const socket = io();
+    const sendBtn = document.getElementById('send-to-receiver');
+    if (sendBtn) {
+        sendBtn.addEventListener('click', () => {
+            const signature = document.getElementById('signature').value;
+            const pub_key = document.getElementById('pubkey').value;
+            const data = document.getElementById('signed-data').value;
+
+            socket.emit('new_signature', {
+                signature: signature,
+                pub_key: pub_key,
+                data: data
+            });
+
+            alert("✅ Đã gửi dữ liệu ký số đến người nhận!");
+        });
+    }
+</script>
+</body>
+</html>

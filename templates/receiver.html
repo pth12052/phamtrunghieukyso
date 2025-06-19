@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Người nhận</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+    <h1>Người Nhận: Nhận File Đã Ký Số</h1>
+
+    <div class="result">
+        <h2>Chữ ký nhận được:</h2>
+        <textarea id="received-signature" rows="6" readonly></textarea>
+
+        <h2>Public Key nhận được:</h2>
+        <textarea id="received-pubkey" rows="10" readonly></textarea>
+
+        <h2>Nội dung file nhận được:</h2>
+        <textarea id="received-data" rows="8" readonly></textarea>
+    </div>
+</div>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+    const socket = io();
+
+    socket.on('new_signature', function(data) {
+        document.getElementById('received-signature').value = data.signature;
+        document.getElementById('received-pubkey').value = data.pub_key;
+        document.getElementById('received-data').value = data.data;
+        alert("🔐 Đã nhận được chữ ký, public key và nội dung file từ người gửi!");
+    });
+</script>
+</body>
+</html>

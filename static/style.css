@@ -1,0 +1,91 @@
+/* Font & Reset */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(to right, #667eea, #764ba2);
+    color: #fff;
+    min-height: 100vh;
+}
+
+/* Container chính */
+.container {
+    max-width: 700px;
+    margin: 40px auto;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 30px 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(5px);
+}
+
+/* Tiêu đề */
+h1 {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+/* Form tải file */
+#drop-area {
+    border: 2px dashed #ddd;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    background-color: rgba(255,255,255,0.1);
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#drop-area.highlight {
+    border-color: #fff;
+    background-color: rgba(255,255,255,0.15);
+}
+
+#drop-area input {
+    display: none;
+}
+
+/* File name */
+#file-name {
+    margin: 10px 0;
+    font-style: italic;
+}
+
+/* Nút gửi */
+button {
+    background-color: #4fd1c5;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #333;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #38b2ac;
+}
+
+/* Kết quả */
+.result {
+    margin-top: 25px;
+}
+
+.result h2 {
+    font-size: 18px;
+    margin-top: 20px;
+}
+
+textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    resize: vertical;
+    font-family: monospace;
+    font-size: 14px;
+    background-color: rgba(255,255,255,0.1);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+}
